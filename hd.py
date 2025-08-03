@@ -83,8 +83,8 @@ st.markdown("""
 st.markdown('<div class="overlay">', unsafe_allow_html=True)
 
 # ---- Static Header and Message ----
-st.markdown("<h1>🎉 Happy Birthday! 🎂</h1>", unsafe_allow_html=True)
-st.markdown("<p>Wishing you a day filled with love, laughter, and everything you enjoy the most! 💖✨</p>", unsafe_allow_html=True)
+st.markdown("<h1>🎉 Happy Birthday! 🎂 Bareera Madam ji!</h1>", unsafe_allow_html=True)
+st.markdown("<p>Wishing you a day filled with love, laughter, and everything you enjoy the most! 💖✨ May Allah make all your wishes come True. Wishing for your Happiness Forever. May this new Year bring you lot good things. May you achieve everything in life what you wish for. Hope you get the best of the best. My Queen deserves the BEST. I find myself soo Lucky to have you by my side. And it's been a Year together, didn't imagine I'd love you soo obsessively in this short term, You became dearest to me, we have a long a long journey to go. Your presence, Your Comfort, Your talks, Your Love & Affection completes me to the fullest and give me HOPE. This day I thank God Almighty that he brought you in this World as a lovely soul. Have a Great day my love, I love you soo much.</p>", unsafe_allow_html=True)
 
 # ---- Session State for Step Control ----
 if "step" not in st.session_state:
@@ -115,11 +115,12 @@ if st.session_state.step >= 2:
     time.sleep(1)
     st.markdown("""
         <p style="font-size:22px;">
-        🥳 May your year be as sweet and sparkly as you are!<br><br>
+        🥳 May your year be as sweet and sparkly as you are! May you carry the sweet and lovely smile you have all along.<br><br>
         With love and best wishes,<br>
-        <b style="color:#d63384;">— Your Name 💫</b>
+        <b style="color:#d63384;">— Your Lovingly, Raza Sir 💫</b>
         </p>
     """, unsafe_allow_html=True)
 
 # ---- Close Wrapper ----
 st.markdown('</div>', unsafe_allow_html=True)
+
