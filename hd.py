@@ -1,103 +1,125 @@
 import streamlit as st
-import cv2
-import numpy as np
-from PIL import Image
-import tempfile
-from ultralytics import YOLO
-from streamlit_webrtc import webrtc_streamer, VideoProcessorBase, WebRtcMode
-import av
-import os
+import time
 
-# Load YOLOv8 model
-model = YOLO("best.pt")  # Replace with your model path
+st.set_page_config(page_title="🎉 Happy Birthday!", layout="wide")
 
-st.set_page_config(page_title="Helmet Detection", layout="wide")
-st.title("🪖 Helmet Detection using YOLOv8")
+# ---- CSS: Background, Centering, Styling ----
+st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Caveat:wght@500&display=swap');
 
-# YOLO prediction function
-def detect_image(img):
-    results = model(img, conf=0.5)
-    return results[0].plot()
+    html, body, .main {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1);
+        background-size: 400% 400%;
+        animation: gradientBG 15s ease infinite;
+    }
 
-# Sidebar for input choice
-input_option = st.sidebar.radio("Select Input Type", ["Image", "Video", "Webcam"])
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
 
-# ======================================
-# IMAGE MODE
-# ======================================
-if input_option == "Image":
-    uploaded_img = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png"])
-    if uploaded_img is not None:
-        image = Image.open(uploaded_img).convert("RGB")
-        img_np = np.array(image)
+    .block-container {
+        padding-top: 0rem !important;
+    }
 
-        st.image(image, caption="Uploaded Image", use_column_width=True)
+    .overlay {
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 3rem 2rem;
+        border-radius: 15px;
+        margin: 2rem auto;
+        max-width: 1000px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
 
-        if st.button("Run Detection"):
-            with st.spinner("Detecting..."):
-                result_img = detect_image(img_np)
-                st.image(result_img, caption="Detected Image", use_column_width=True)
+    h1 {
+        text-align: center;
+        font-family: 'Pacifico', cursive;
+        color: #d63384;
+        margin-top: 0 !important;
+        font-size: 3.5rem;
+        line-height: 1.2;
+    }
 
-                # Save result
-                output_path = "output_image.jpg"
-                cv2.imwrite(output_path, cv2.cvtColor(result_img, cv2.COLOR_RGB2BGR))
-                with open(output_path, "rb") as file:
-                    st.download_button("Download Detected Image", file, "helmet_detected.jpg")
+    p {
+        text-align: center;
+        font-size: 22px;
+        font-family: 'Caveat', cursive;
+        color: #6f42c1;
+    }
 
-# ======================================
-# VIDEO MODE
-# ======================================
-elif input_option == "Video":
-    uploaded_video = st.file_uploader("Upload Video", type=["mp4", "avi", "mov", "mkv"])
-    if uploaded_video is not None:
-        tfile = tempfile.NamedTemporaryFile(delete=False)
-        tfile.write(uploaded_video.read())
-        video_path = tfile.name
+    .button-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 30px;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
 
-        st.video(video_path)
+    .stButton>button {
+        font-size: 20px;
+        padding: 0.7em 1.5em;
+        border-radius: 12px;
+        background-color: #ff66cc;
+        color: white;
+        border: none;
+        transition: all 0.3s ease-in-out;
+        font-family: 'Caveat', cursive;
+    }
 
-        if st.button("Run Detection on Video"):
-            cap = cv2.VideoCapture(video_path)
-            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            fps = cap.get(cv2.CAP_PROP_FPS)
+    .stButton>button:hover {
+        background-color: #ff1493;
+        transform: scale(1.08);
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-            out_path = "output_video.mp4"
-            out = cv2.VideoWriter(out_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (width, height))
+# ---- Overlay Wrapper ----
+st.markdown('<div class="overlay">', unsafe_allow_html=True)
 
-            stframe = st.empty()
-            while cap.isOpened():
-                ret, frame = cap.read()
-                if not ret:
-                    break
-                results = model(frame, conf=0.5)
-                annotated = results[0].plot()
-                out.write(annotated)
-                stframe.image(annotated, channels="RGB")
+# ---- Static Header and Message ----
+st.markdown("<h1>🎉 Happy Birthday! 🎂</h1>", unsafe_allow_html=True)
+st.markdown("<p>Wishing you a day filled with love, laughter, and everything you enjoy the most! 💖✨</p>", unsafe_allow_html=True)
 
-            cap.release()
-            out.release()
+# ---- Session State for Step Control ----
+if "step" not in st.session_state:
+    st.session_state.step = 0
 
-            with open(out_path, "rb") as file:
-                st.download_button("Download Processed Video", file, "helmet_detected_video.mp4")
+# ---- Step 0: Intro Button ----
+if st.session_state.step == 0:
+    st.markdown('<div class="button-container">', unsafe_allow_html=True)
+    if st.button("💌 Make it more special"):
+        st.session_state.step = 1
+    st.markdown('</div>', unsafe_allow_html=True)
 
-# ======================================
-# WEBCAM MODE
-# ======================================
-elif input_option == "Webcam":
-    st.info("Allow browser webcam access below")
+# ---- Step 1: First Video ----
+if st.session_state.step >= 1:
+    st.video("video1.mp4")
+    time.sleep(1)
+    st.markdown("<p style='font-size:24px;'>🌟 It is not over yet...</p>", unsafe_allow_html=True)
 
-    class YOLOVideoProcessor(VideoProcessorBase):
-        def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
-            img = frame.to_ndarray(format="bgr24")
-            results = model(img, conf=0.3)
-            annotated = results[0].plot()
-            return av.VideoFrame.from_ndarray(annotated, format="bgr24")
+    if st.session_state.step == 1:
+        st.markdown('<div class="button-container">', unsafe_allow_html=True)
+        if st.button("🎁 See more"):
+            st.session_state.step = 2
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    webrtc_streamer(
-        key="helmet-webcam",
-        mode=WebRtcMode.SENDRECV,
-        video_processor_factory=YOLOVideoProcessor,
-        media_stream_constraints={"video": True, "audio": False},
-        async_processing=True,
-    )
+# ---- Step 2: Final Video & Message ----
+if st.session_state.step >= 2:
+    st.video("video2.mp4")
+    time.sleep(1)
+    st.markdown("""
+        <p style="font-size:22px;">
+        🥳 May your year be as sweet and sparkly as you are!<br><br>
+        With love and best wishes,<br>
+        <b style="color:#d63384;">— Your Name 💫</b>
+        </p>
+    """, unsafe_allow_html=True)
+
+# ---- Close Wrapper ----
+st.markdown('</div>', unsafe_allow_html=True)
